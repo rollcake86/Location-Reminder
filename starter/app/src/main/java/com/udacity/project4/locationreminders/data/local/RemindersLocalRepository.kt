@@ -48,7 +48,7 @@ class RemindersLocalRepository(
         try {
             val reminder = remindersDao.getReminderById(id)
             if (reminder != null) {
-                return@withContext Result.Success(reminder)
+                return@withContext Result.Success(listOf(reminder))
             } else {
                 return@withContext Result.Error("Reminder not found!")
             }

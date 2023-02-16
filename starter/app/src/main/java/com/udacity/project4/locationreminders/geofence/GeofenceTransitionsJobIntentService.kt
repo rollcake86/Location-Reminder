@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.JobIntentService
 import com.google.android.gms.location.Geofence
+import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
@@ -53,12 +54,12 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
                 //send a notification to the user with the reminder details
                 sendNotification(
                     this@GeofenceTransitionsJobIntentService, ReminderDataItem(
-                        reminderDTO.title,
-                        reminderDTO.description,
-                        reminderDTO.location,
-                        reminderDTO.latitude,
-                        reminderDTO.longitude,
-                        reminderDTO.id
+                        reminderDTO!![0].title,
+                        reminderDTO[0].description,
+                        reminderDTO[0].location,
+                        reminderDTO[0].latitude,
+                        reminderDTO[0].longitude,
+                        reminderDTO[0].id
                     )
                 )
             }
