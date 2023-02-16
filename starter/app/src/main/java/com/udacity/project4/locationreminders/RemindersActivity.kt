@@ -7,8 +7,13 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.map
 import androidx.navigation.fragment.NavHostFragment
+import com.firebase.ui.auth.AuthUI
 import com.udacity.project4.R
+import com.udacity.project4.authentication.AuthenticationState
+import com.udacity.project4.authentication.FirebaseUserLiveData
+import com.udacity.project4.authentication.LoginViewModel
 
 /**
  * The RemindersActivity that holds the reminders fragments
@@ -30,4 +35,6 @@ class RemindersActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
+
+
 }

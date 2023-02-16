@@ -1,9 +1,16 @@
 package com.udacity.project4.locationreminders.reminderslist
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.map
+import com.firebase.ui.auth.AuthUI
 import com.udacity.project4.R
+import com.udacity.project4.authentication.AuthenticationActivity
+import com.udacity.project4.authentication.AuthenticationState
+import com.udacity.project4.authentication.FirebaseUserLiveData
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentRemindersBinding
@@ -32,6 +39,8 @@ class ReminderListFragment : BaseFragment() {
         setTitle(getString(R.string.app_name))
 
         binding.refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
+
+
 
         return binding.root
     }
@@ -71,7 +80,7 @@ class ReminderListFragment : BaseFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.logout -> {
-//                TODO: add the logout implementation
+                logout()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -83,5 +92,22 @@ class ReminderListFragment : BaseFragment() {
 //        display logout as menu item
         inflater.inflate(R.menu.main_menu, menu)
     }
+    fun logout(){
+//        val authenticationState = FirebaseUserLiveData().map { user ->
+//            if (user != null) {
+//                AuthenticationState.AUTHENTICATED
+//            } else {
+//                AuthenticationState.UNAUTHENTICATED
+//            }
+//        }
+//        Log.e("TAGTAG" , authenticationState.value!!.name)
+//        if(authenticationState.value == AuthenticationState.AUTHENTICATED ){
+//
+//        }
 
+
+        AuthUI.getInstance().signOut(this.requireContext()) .addOnCompleteListener {
+            requireActivity().startActivity(Intent(this.context , AuthenticationActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY))
+        }
+    }
 }
