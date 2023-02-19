@@ -7,9 +7,11 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
+import com.udacity.project4.MyApp
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.RemindersActivity
 
@@ -30,43 +32,31 @@ class AuthenticationActivity : AppCompatActivity() {
         findViewById<Button>(R.id.login_button).setOnClickListener {
             launchSignInFlow()
         }
+        (application as MyApp).firebaseUserLiveData.observe(this) {
+
+        }
 
     }
     private fun launchSignInFlow() {
-        // Give users the option to sign in / register with their email or Google account. If users
-        // choose to register with their email, they will need to create a password as well.
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(), AuthUI.IdpConfig.GoogleBuilder().build()
         )
-        // Create and launch sign-in intent. We listen to the response of this activity with the
-        // SIGN_IN_RESULT_CODE code.
         startActivityForResult(
             AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(
                 providers
             ).build(), SIGN_IN_RESULT_CODE
         )
     }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == SIGN_IN_RESULT_CODE) {
             val response = IdpResponse.fromResultIntent(data)
             if (resultCode == Activity.RESULT_OK) {
-                // Successfully signed in user.
-                Log.i(
-                    TAG,
-                    "Successfully signed in user " +
-                            "${FirebaseAuth.getInstance().currentUser?.displayName}!"
-                )
                 val intent = Intent(this , RemindersActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME
                 startActivity(intent)
                 this.finish()
             } else {
-                // Sign in failed. If response is null the user canceled the sign-in flow using
-                // the back button. Otherwise check response.getError().getErrorCode() and handle
-                // the error.
-                Log.i(TAG, "Sign in unsuccessful ${response?.error?.errorCode}")
                 findViewById<TextView>(R.id.title).setText("${getString(R.string.logError)} ${response?.error?.errorCode}")
             }
         }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.map
 import com.firebase.ui.auth.AuthUI
@@ -93,19 +94,7 @@ class ReminderListFragment : BaseFragment() {
         inflater.inflate(R.menu.main_menu, menu)
     }
     fun logout(){
-//        val authenticationState = FirebaseUserLiveData().map { user ->
-//            if (user != null) {
-//                AuthenticationState.AUTHENTICATED
-//            } else {
-//                AuthenticationState.UNAUTHENTICATED
-//            }
-//        }
-//        Log.e("TAGTAG" , authenticationState.value!!.name)
-//        if(authenticationState.value == AuthenticationState.AUTHENTICATED ){
-//
-//        }
-
-
+        Toast.makeText(this.requireContext() , getString(R.string.logout) , Toast.LENGTH_SHORT)
         AuthUI.getInstance().signOut(this.requireContext()) .addOnCompleteListener {
             requireActivity().startActivity(Intent(this.context , AuthenticationActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY))
         }

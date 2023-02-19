@@ -1,6 +1,7 @@
 package com.udacity.project4
 
 import android.app.Application
+import com.udacity.project4.authentication.FirebaseUserLiveData
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
@@ -13,9 +14,11 @@ import org.koin.dsl.module
 
 class MyApp : Application() {
 
+    lateinit var firebaseUserLiveData : FirebaseUserLiveData
+
     override fun onCreate() {
         super.onCreate()
-
+        firebaseUserLiveData = FirebaseUserLiveData()
         /**
          * use Koin Library as a service locator
          */
