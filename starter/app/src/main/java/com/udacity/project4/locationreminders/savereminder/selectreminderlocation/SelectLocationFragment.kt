@@ -8,11 +8,11 @@ import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import androidx.activity.OnBackPressedCallback
+import android.widget.Button
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -35,7 +35,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
     private var map: GoogleMap? = null
-    private var selectedMarker: Marker? = null
 
     val latitude = 38.422160
     val longitude = 127.084270
@@ -57,6 +56,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
+
         return binding.root
     }
 
@@ -65,6 +65,13 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        view.findViewById<Button>(R.id.save_btn).setOnClickListener {
+            if(_viewModel.selectedPOI.value != null){
+                findNavController().popBackStack()
+            } else {
+                Toast.makeText(context , getString(R.string.not_selected_poi) , Toast.LENGTH_SHORT).show()
+            }
+        }
 
     }
 
@@ -78,7 +85,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                     R.raw.map_style
                 )
             )
-
             if (!success) {
                 Log.e(TAG, "Style parsing failed.")
             }
@@ -149,6 +155,12 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private fun setPoiClick(map: GoogleMap) {
         map.setOnPoiClickListener { poi ->
+
+            _viewModel.latitude.value = poi.latLng.latitude
+            _viewModel.longitude.value = poi.latLng.longitude
+            _viewModel.reminderSelectedLocationStr.value = poi.name
+            _viewModel.selectedPOI.value = poi
+
             val poiMarker = map.addMarker(
                 MarkerOptions()
                     .position(poi.latLng)
@@ -172,7 +184,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                     .position(latLng)
                     .title(getString(R.string.dropped_pin))
                     .snippet(snippet)
-
             )
         }
     }
@@ -184,14 +195,14 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         setPoiClick(map!!)
         setMapLongClick(map!!)
         map!!.setOnMarkerClickListener {
-            selectedMarker = it
+            _viewModel.latitude.value = it.position.latitude
+            _viewModel.longitude.value = it.position.longitude
+            _viewModel.reminderSelectedLocationStr.value = it.title
+            _viewModel.selectedPOI.value = PointOfInterest(it.position , it.id , it.title )
             false
         }
         setMapStyle(map!!)
         enableMyLocation()
     }
 
-    fun saveLocation() {
-        Navigation
-    }
 }

@@ -42,4 +42,6 @@
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
     <string name="logError">Sign in unsuccessful</string>
     <string name="map">fragment_map</string>
+    <string name="not_selected_poi">Not selected POI</string>
+    <string name="unknown_geofence_error">Unknown Geofence Error</string>
 </resources>
