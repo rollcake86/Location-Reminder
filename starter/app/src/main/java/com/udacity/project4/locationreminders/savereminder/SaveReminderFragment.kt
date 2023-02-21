@@ -23,6 +23,7 @@ import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
+import com.udacity.project4.locationreminders.geofence.GeofenceTransitionsJobIntentService
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.GeofencingConstants
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
@@ -119,11 +120,11 @@ class SaveReminderFragment : BaseFragment() {
             addOnCompleteListener {
                 geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
                     addOnSuccessListener {
-//                        Toast.makeText(
-//                            requireActivity(), R.string.geofences_added,
-//                            Toast.LENGTH_SHORT
-//                        )
-//                            .show()
+
+                        val intent = Intent(context, GeofenceTransitionsJobIntentService::class.java)
+                        requireContext().startService(intent)
+                        GeofenceTransitionsJobIntentService.enqueueWork(requireContext(),intent)
+
                         Log.e("Add Geofence", geofence.requestId)
                     }
                     addOnFailureListener {
