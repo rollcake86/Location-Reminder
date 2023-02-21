@@ -44,4 +44,5 @@
     <string name="map">fragment_map</string>
     <string name="not_selected_poi">Not selected POI</string>
     <string name="unknown_geofence_error">Unknown Geofence Error</string>
+    <string name="geofences_added">Geofencess Add!!</string>
 </resources>

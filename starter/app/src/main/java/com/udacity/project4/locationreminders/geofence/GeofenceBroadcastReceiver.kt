@@ -11,7 +11,6 @@ import com.google.android.gms.location.GeofencingEvent
 import com.udacity.project4.R
 import com.udacity.project4.utils.GeofencingConstants
 import com.udacity.project4.utils.errorMessage
-import com.udacity.project4.utils.sendGeofenceEnteredNotification
 
 /**
  * Triggered by the Geofence.  Since we can have many Geofences at once, we pull the request
