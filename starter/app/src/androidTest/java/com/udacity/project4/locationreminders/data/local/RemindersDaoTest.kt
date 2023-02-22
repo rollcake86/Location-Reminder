@@ -18,13 +18,53 @@ import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Test
+import org.robolectric.annotation.Config
 
+@Config(sdk = [31])
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 //Unit test the DAO
 @SmallTest
 class RemindersDaoTest {
 
-//    TODO: Add testing implementation to the RemindersDao.kt
+    @get:Rule
+    var instantExecutorRule = InstantTaskExecutorRule()
 
+    private lateinit var database: RemindersDatabase
+
+    @Before
+    fun initDb() {
+        database = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            RemindersDatabase::class.java
+        ).build()
+    }
+
+    @After
+    fun closeDb() = database.close()
+
+    @Test
+    fun insertReminderAndGetById() = runBlockingTest {
+        // GIVEN - insert a reminder
+        val reminder = ReminderDTO(
+            "title",
+            "description",
+            "somewhere",
+            12.0,
+            12.0,
+            "random"
+        )
+        database.reminderDao().saveReminder(reminder)
+
+        // WHEN - Get the reminder by id from the database
+        val loaded = database.reminderDao().getReminderById(reminder.id)
+
+        // THEN - The loaded data contains the expected values
+        assertThat(loaded as ReminderDTO, notNullValue())
+        assertThat(loaded.id, `is`(reminder.id))
+        assertThat(loaded.title, `is`(reminder.title))
+        assertThat(loaded.description, `is`(reminder.description))
+        assertThat(loaded.latitude, `is`(reminder.latitude))
+        assertThat(loaded.longitude, `is`(reminder.longitude))
+    }
 }

@@ -64,6 +64,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         enableMyLocation()
         view.findViewById<Button>(R.id.save_btn).setOnClickListener {
             if(_viewModel.selectedPOI.value != null){
+                Toast.makeText(context , "Write in ${getString(R.string.reminder_title) + getString(R.string.reminder_desc)}" , Toast.LENGTH_SHORT).show()
                 findNavController().popBackStack()
             } else {
                 Toast.makeText(context , getString(R.string.not_selected_poi) , Toast.LENGTH_SHORT).show()
