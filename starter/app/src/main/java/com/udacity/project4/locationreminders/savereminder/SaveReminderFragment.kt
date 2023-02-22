@@ -121,17 +121,9 @@ class SaveReminderFragment : BaseFragment() {
                 geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
                     addOnSuccessListener {
 
-                        val intent = Intent(context, GeofenceTransitionsJobIntentService::class.java)
-                        requireContext().startService(intent)
-                        GeofenceTransitionsJobIntentService.enqueueWork(requireContext(),intent)
-
                         Log.e("Add Geofence", geofence.requestId)
                     }
                     addOnFailureListener {
-//                        Toast.makeText(
-//                            requireActivity(), R.string.geofences_not_added,
-//                            Toast.LENGTH_SHORT
-//                        ).show()
                         if ((it.message != null)) {
                             Log.w(TAG, it.message!!)
                         }
@@ -207,6 +199,8 @@ class SaveReminderFragment : BaseFragment() {
             resultCode
         )
     }
+
+
 }
 
 private const val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 33

@@ -56,15 +56,12 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val mapFragment =
-            childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        enableMyLocation()
         view.findViewById<Button>(R.id.save_btn).setOnClickListener {
             if(_viewModel.selectedPOI.value != null){
                 findNavController().popBackStack()
@@ -72,13 +69,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 Toast.makeText(context , getString(R.string.not_selected_poi) , Toast.LENGTH_SHORT).show()
             }
         }
-
     }
 
     private fun setMapStyle(map: GoogleMap) {
         try {
-            // Customize the styling of the base map using a JSON object defined
-            // in a raw resource file.
             val success = map.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
                     context,
@@ -135,21 +129,37 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     @SuppressLint("MissingPermission")
-    private fun enableMyLocation() {
+    private fun enableMyLocation() : Boolean {
         if (isPermissionGranted()) {
-            if (map != null) {
-                map!!.isMyLocationEnabled = true;
-                map!!.uiSettings.isMyLocationButtonEnabled = true;
-            }
+            val mapFragment =
+                childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+            mapFragment.getMapAsync(this)
+
+            return true
         } else {
-            ActivityCompat.requestPermissions(
-                this.requireActivity(),
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ),
-                REQUEST_LOCATION_PERMISSION
-            )
+            requestPermissions(arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ),
+                REQUEST_LOCATION_PERMISSION)
+            return false
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        Log.e(TAG , requestCode.toString())
+        if(requestCode == REQUEST_LOCATION_PERMISSION){
+            if(grantResults.isNotEmpty() && grantResults.get(0) == PackageManager.PERMISSION_GRANTED ) {
+                val mapFragment =
+                    childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+                mapFragment.getMapAsync(this)
+            } else {
+                Toast.makeText(context , getString(R.string.permission_denied_explanation) , Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -188,6 +198,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         val zoomLevel = 15f
@@ -202,7 +213,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             false
         }
         setMapStyle(map!!)
-        enableMyLocation()
+        if (map != null) {
+            map!!.isMyLocationEnabled = true;
+            map!!.uiSettings.isMyLocationButtonEnabled = true;
+        }
     }
 
 }

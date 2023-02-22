@@ -55,4 +55,35 @@ fun sendNotification(context: Context, reminderDataItem: ReminderDataItem) {
     notificationManager.notify(getUniqueId(), notification)
 }
 
+fun NotificationManager.sendGeofenceEnteredNotification(context: Context, foundIndex: String) {
+    val contentIntent = Intent(context, RemindersActivity::class.java)
+    contentIntent.putExtra(GeofencingConstants.EXTRA_GEOFENCE_INDEX, foundIndex)
+    val contentPendingIntent = PendingIntent.getActivity(
+        context,
+        getUniqueId(),
+        contentIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT
+    )
+    val mapImage = BitmapFactory.decodeResource(
+        context.resources,
+        R.drawable.map_small
+    )
+    val bigPicStyle = NotificationCompat.BigPictureStyle()
+        .bigPicture(mapImage)
+        .bigLargeIcon(null)
+
+    // We use the name resource ID from the LANDMARK_DATA along with content_text to create
+    // a custom message when a Geofence triggers.
+    val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+        .setContentTitle(context.getString(R.string.app_name))
+        .setContentText(context.getString(R.string.content_text))
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setContentIntent(contentPendingIntent)
+        .setSmallIcon(R.drawable.map_small)
+        .setStyle(bigPicStyle)
+        .setLargeIcon(mapImage)
+
+    notify(getUniqueId(), builder.build())
+}
+
 private fun getUniqueId() = ((System.currentTimeMillis() % 10000).toInt())

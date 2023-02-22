@@ -1,10 +1,12 @@
 package com.udacity.project4
 
 import android.app.Application
+import android.content.Intent
 import com.udacity.project4.authentication.FirebaseUserLiveData
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
+import com.udacity.project4.locationreminders.geofence.GeofenceTransitionsJobIntentService
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import org.koin.android.ext.koin.androidContext
@@ -18,6 +20,11 @@ class MyApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        val intent = Intent(this, GeofenceTransitionsJobIntentService::class.java)
+        startService(intent)
+        GeofenceTransitionsJobIntentService.enqueueWork(this,intent)
+
         firebaseUserLiveData = FirebaseUserLiveData()
         /**
          * use Koin Library as a service locator
