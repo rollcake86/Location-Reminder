@@ -5,6 +5,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.icu.text.Transliterator.Position
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -63,11 +64,16 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
         enableMyLocation()
         view.findViewById<Button>(R.id.save_btn).setOnClickListener {
-            if(_viewModel.selectedPOI.value != null){
-                Toast.makeText(context , "Write in ${getString(R.string.reminder_title) + getString(R.string.reminder_desc)}" , Toast.LENGTH_SHORT).show()
+            if (_viewModel.selectedPOI.value != null) {
+                Toast.makeText(
+                    context,
+                    "Write in ${getString(R.string.reminder_title) + getString(R.string.reminder_desc)}",
+                    Toast.LENGTH_SHORT
+                ).show()
                 findNavController().popBackStack()
             } else {
-                Toast.makeText(context , getString(R.string.not_selected_poi) , Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.not_selected_poi), Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -130,7 +136,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     @SuppressLint("MissingPermission")
-    private fun enableMyLocation() : Boolean {
+    private fun enableMyLocation(): Boolean {
         if (isPermissionGranted()) {
             val mapFragment =
                 childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -138,11 +144,13 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
             return true
         } else {
-            requestPermissions(arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ),
-                REQUEST_LOCATION_PERMISSION)
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+                REQUEST_LOCATION_PERMISSION
+            )
             return false
         }
     }
@@ -152,14 +160,18 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        Log.e(TAG , requestCode.toString())
-        if(requestCode == REQUEST_LOCATION_PERMISSION){
-            if(grantResults.isNotEmpty() && grantResults.get(0) == PackageManager.PERMISSION_GRANTED ) {
+        Log.e(TAG, requestCode.toString())
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.isNotEmpty() && grantResults.get(0) == PackageManager.PERMISSION_GRANTED) {
                 val mapFragment =
                     childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
                 mapFragment.getMapAsync(this)
             } else {
-                Toast.makeText(context , getString(R.string.permission_denied_explanation) , Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    getString(R.string.permission_denied_explanation),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -195,6 +207,15 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                     .position(latLng)
                     .title(getString(R.string.dropped_pin))
                     .snippet(snippet)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+            )
+            _viewModel.latitude.value = latLng.latitude
+            _viewModel.longitude.value = latLng.longitude
+            _viewModel.reminderSelectedLocationStr.value = "Custom location"
+            _viewModel.selectedPOI.value = PointOfInterest(
+                LatLng(latitude, longitude),
+                UUID.randomUUID().toString(),
+                getString(R.string.dropped_pin)
             )
         }
     }
@@ -206,13 +227,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         map!!.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLatLng, zoomLevel))
         setPoiClick(map!!)
         setMapLongClick(map!!)
-        map!!.setOnMarkerClickListener {
-            _viewModel.latitude.value = it.position.latitude
-            _viewModel.longitude.value = it.position.longitude
-            _viewModel.reminderSelectedLocationStr.value = it.title
-            _viewModel.selectedPOI.value = PointOfInterest(it.position , it.id , it.title )
-            false
-        }
+
         setMapStyle(map!!)
         if (map != null) {
             map!!.isMyLocationEnabled = true;

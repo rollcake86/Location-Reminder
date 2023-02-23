@@ -45,7 +45,6 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     }
 
     private fun sendNotification(triggeringGeofences: List<Geofence>) {
-        val requestId = ""
         triggeringGeofences.forEach {
             val requestId = it.requestId
             val remindersLocalRepository: ReminderDataSource by inject()

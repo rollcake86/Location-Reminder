@@ -22,14 +22,12 @@ import androidx.lifecycle.map
 import androidx.preference.PreferenceManager
 import com.udacity.project4.R
 import kotlin.random.Random
-enum class AuthenticationState {
-    AUTHENTICATED, UNAUTHENTICATED, INVALID_AUTHENTICATION
-}
 
 class LoginViewModel : ViewModel() {
 
-
-
+    enum class AuthenticationState {
+        AUTHENTICATED, UNAUTHENTICATED, INVALID_AUTHENTICATION
+    }
 
     val authenticationState = FirebaseUserLiveData().map { user ->
         if (user != null) {

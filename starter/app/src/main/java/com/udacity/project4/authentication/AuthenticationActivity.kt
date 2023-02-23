@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.firebase.ui.auth.AuthUI
@@ -13,6 +14,7 @@ import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.MyApp
 import com.udacity.project4.R
+import com.udacity.project4.databinding.ActivityAuthenticationBinding
 import com.udacity.project4.locationreminders.RemindersActivity
 
 /**
@@ -21,6 +23,9 @@ import com.udacity.project4.locationreminders.RemindersActivity
  */
 class AuthenticationActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityAuthenticationBinding
+    private val viewModel by viewModels<LoginViewModel>()
+
     companion object {
         const val TAG = "AuthenticationActivity"
         const val SIGN_IN_RESULT_CODE = 1001
@@ -28,12 +33,22 @@ class AuthenticationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_authentication)
-        findViewById<Button>(R.id.login_button).setOnClickListener {
+        binding = ActivityAuthenticationBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+
+        binding.loginButton.setOnClickListener {
             launchSignInFlow()
         }
-        (application as MyApp).firebaseUserLiveData.observe(this) {
 
+        viewModel.authenticationState.observe(this) { authenticationState ->
+            when (authenticationState) {
+                LoginViewModel.AuthenticationState.AUTHENTICATED -> startRemindersActivity()
+                else -> Log.e(
+                    TAG,
+                    "Authentication state that doesn't require any UI change $authenticationState"
+                )
+            }
         }
 
     }
@@ -60,5 +75,10 @@ class AuthenticationActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.title).setText("${getString(R.string.logError)} ${response?.error?.errorCode}")
             }
         }
+    }
+
+    private fun startRemindersActivity() {
+        val activityIntent = Intent(this, RemindersActivity::class.java)
+        startActivity(activityIntent)
     }
 }
