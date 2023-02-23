@@ -3,6 +3,7 @@ package com.udacity.project4.locationreminders.reminderslist
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.getOrAwaitValue
@@ -11,6 +12,7 @@ import kotlinx.coroutines.test.pauseDispatcher
 import kotlinx.coroutines.test.resumeDispatcher
 import org.hamcrest.CoreMatchers
 import org.hamcrest.core.Is
+import org.hamcrest.core.Is.`is`
 import org.hamcrest.core.IsNot
 import org.junit.Assert
 import org.junit.Before
@@ -81,5 +83,7 @@ class RemindersListViewModelTest {
             remindersListViewModel.showSnackBar.getOrAwaitValue(),
             IsNot.not(CoreMatchers.nullValue())
         )
+
+        Assert.assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), `is`(true))
     }
 }

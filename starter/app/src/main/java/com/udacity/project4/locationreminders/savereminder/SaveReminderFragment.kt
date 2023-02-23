@@ -34,6 +34,7 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.GeofencingConstants
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import java.util.UUID
 
 class SaveReminderFragment : BaseFragment() {
     //Get the view model this time as a single to be shared with the another fragment
@@ -43,6 +44,7 @@ class SaveReminderFragment : BaseFragment() {
     private val runningQOrLater =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
+    private lateinit var id: String
     private var title: String? = null
     private var description: String? = null
     private var location: String? = null
@@ -100,6 +102,7 @@ class SaveReminderFragment : BaseFragment() {
             location = _viewModel.reminderSelectedLocationStr.value
             latitude = _viewModel.latitude.value
             longitude = _viewModel.longitude.value
+            id = UUID.randomUUID().toString()
 
             if (
                 title == null ||
@@ -116,6 +119,10 @@ class SaveReminderFragment : BaseFragment() {
             } else {
                 checkPermissionsAndStartGeofencing()
             }
+        }
+
+        if (!foregroundAndBackgroundLocationPermissionApproved()) {
+            requestForegroundAndBackgroundLocationPermissions()
         }
     }
 
@@ -161,17 +168,18 @@ class SaveReminderFragment : BaseFragment() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun addGeofence(location: String, latitude: Double, longitude: Double) {
+    private fun addGeofence() {
 
         val geofence = Geofence.Builder()
-            .setRequestId(location)
+            .setRequestId(id)
             .setCircularRegion(
-                latitude,
-                longitude,
+                latitude!!,
+                longitude!!,
                 GeofencingConstants.GEOFENCE_RADIUS_IN_METERS
             )
-            .setExpirationDuration(GeofencingConstants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+            .setExpirationDuration(-1L)
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+            .setLoiteringDelay(1000)
             .build()
 
         val geofencingRequest = GeofencingRequest.Builder()
@@ -246,7 +254,7 @@ class SaveReminderFragment : BaseFragment() {
             checkDeviceLocationSettings(resolve)
         locationSettingsResponseTask?.addOnCompleteListener {
             if (it.isSuccessful) {
-                addGeofence(location!!, latitude!!, longitude!!)
+                addGeofence()
                 _viewModel.saveReminder(
                     ReminderDataItem(
                         title,
@@ -286,13 +294,7 @@ class SaveReminderFragment : BaseFragment() {
      */
     @TargetApi(29)
     private fun requestForegroundAndBackgroundLocationPermissions() {
-        if (foregroundAndBackgroundLocationPermissionApproved())
-            return
-
-        // Else request the permission
-        // this provides the result[LOCATION_PERMISSION_INDEX]
         var permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-
         val resultCode = when {
             runningQOrLater -> {
                 permissionsArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
@@ -300,10 +302,8 @@ class SaveReminderFragment : BaseFragment() {
             }
             else -> REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
         }
-
         Log.d(TAG, "Request foreground only location permission")
-        ActivityCompat.requestPermissions(
-            requireActivity(),
+        requestPermissions(
             permissionsArray,
             resultCode
         )

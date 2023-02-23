@@ -54,7 +54,7 @@ internal object GeofencingConstants {
      */
     val GEOFENCE_EXPIRATION_IN_MILLISECONDS: Long = TimeUnit.HOURS.toMillis(1)
 
-    const val GEOFENCE_RADIUS_IN_METERS = 100f
+    const val GEOFENCE_RADIUS_IN_METERS = 500f
     const val EXTRA_GEOFENCE_INDEX = "GEOFENCE_INDEX"
 
 }
