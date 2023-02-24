@@ -90,6 +90,12 @@ class RemindersLocalRepositoryTest {
         assertThat(sortedLoadedRemindersList[0].id, `is`(remindersList[0].id))
         assertThat(sortedLoadedRemindersList[1].id, `is`(remindersList[1].id))
         assertThat(sortedLoadedRemindersList[2].id, `is`(remindersList[2].id))
+        assertThat(remindersDatabase.reminderDao().getReminderById(remindersList[0].id)!!.id, `is`(sortedLoadedRemindersList[0].id))
+
+        remindersDatabase.reminderDao().deleteAllReminders()
+
+        assertThat(remindersDatabase.reminderDao().getReminders()!!.size, `is`(0))
+
     }
 
 }

@@ -1,7 +1,6 @@
 package com.udacity.project4.locationreminders.reminderslist
 
 import android.app.Application
-import android.content.Context
 import android.os.Bundle
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -10,9 +9,8 @@ import androidx.navigation.Navigation
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.udacity.project4.R
@@ -23,7 +21,6 @@ import com.udacity.project4.locationreminders.data.local.RemindersLocalRepositor
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -33,6 +30,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
+import org.koin.test.AutoCloseKoinTest
 import org.koin.test.get
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
@@ -41,7 +39,7 @@ import org.mockito.Mockito.verify
 @ExperimentalCoroutinesApi
 //UI Testing
 @MediumTest
-class ReminderListFragmentTest {
+class ReminderListFragmentTest : AutoCloseKoinTest() {
 
     private lateinit var remindersRepository: ReminderDataSource
     private lateinit var appContext: Application
@@ -83,11 +81,11 @@ class ReminderListFragmentTest {
             modules(listOf(myModule))
         }
 
-//        remindersRepository = get()
-//
-//        runBlocking {
-//            remindersRepository.deleteAllReminders()
-//        }
+        remindersRepository = get()
+
+        runBlocking {
+            remindersRepository.deleteAllReminders()
+        }
     }
 
     @Test
@@ -129,15 +127,15 @@ class ReminderListFragmentTest {
             launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
 
             // THEN - the reminder is displayed
-            onView(ViewMatchers.withText(reminder1.title)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-            onView(ViewMatchers.withText(reminder1.description)).check(
-                ViewAssertions.matches(
-                    ViewMatchers.isDisplayed()
+            onView(withText(reminder1.title)).check(matches(isDisplayed()))
+            onView(withText(reminder1.description)).check(
+                matches(
+                    isDisplayed()
                 )
             )
-            onView(ViewMatchers.withText(reminder1.location)).check(
-                ViewAssertions.matches(
-                    ViewMatchers.isDisplayed()
+            onView(withText(reminder1.location)).check(
+                matches(
+                    isDisplayed()
                 )
             )
         }

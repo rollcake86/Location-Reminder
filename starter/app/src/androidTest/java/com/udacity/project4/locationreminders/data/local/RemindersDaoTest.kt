@@ -52,13 +52,14 @@ class RemindersDaoTest {
             "somewhere",
             12.0,
             12.0,
-            "random"
+            "random222"
         )
         database.reminderDao().saveReminder(reminder)
 
         // WHEN - Get the reminder by id from the database
         val loaded = database.reminderDao().getReminderById(reminder.id)
 
+        print("load data : ${loaded?.id} , ${loaded?.title}")
         // THEN - The loaded data contains the expected values
         assertThat(loaded as ReminderDTO, notNullValue())
         assertThat(loaded.id, `is`(reminder.id))
