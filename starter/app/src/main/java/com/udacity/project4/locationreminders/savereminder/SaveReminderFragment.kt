@@ -121,9 +121,9 @@ class SaveReminderFragment : BaseFragment() {
             }
         }
 
-        if (!foregroundAndBackgroundLocationPermissionApproved()) {
-            requestForegroundAndBackgroundLocationPermissions()
-        }
+//        if (!foregroundAndBackgroundLocationPermissionApproved()) {
+//            requestForegroundAndBackgroundLocationPermissions()
+//        }
     }
 
     @Deprecated("Deprecated in Java")

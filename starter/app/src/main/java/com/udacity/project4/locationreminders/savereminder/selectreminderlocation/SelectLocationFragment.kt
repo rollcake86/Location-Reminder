@@ -62,7 +62,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        enableMyLocation()
+
         view.findViewById<Button>(R.id.save_btn).setOnClickListener {
             if (_viewModel.selectedPOI.value != null) {
                 Toast.makeText(
@@ -76,6 +76,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                     .show()
             }
         }
+        val mapFragment =
+            childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
     }
 
     private fun setMapStyle(map: GoogleMap) {
@@ -127,22 +130,19 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private fun isPermissionGranted(): Boolean {
         return ContextCompat.checkSelfPermission(
-            this.requireContext(),
+            requireContext(),
             Manifest.permission.ACCESS_FINE_LOCATION
-        ) === PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
-            this.requireContext(),
-            Manifest.permission.ACCESS_COARSE_LOCATION
         ) === PackageManager.PERMISSION_GRANTED
     }
 
     @SuppressLint("MissingPermission")
-    private fun enableMyLocation(): Boolean {
+    private fun enableMyLocation() {
         if (isPermissionGranted()) {
-            val mapFragment =
-                childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-            mapFragment.getMapAsync(this)
-
-            return true
+            if (map != null) {
+                map!!.isMyLocationEnabled = true;
+                map!!.uiSettings.isMyLocationButtonEnabled = true;
+            }
+            Toast.makeText(context, "Location permission is granted.", Toast.LENGTH_SHORT).show()
         } else {
             requestPermissions(
                 arrayOf(
@@ -151,7 +151,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 ),
                 REQUEST_LOCATION_PERMISSION
             )
-            return false
         }
     }
 
@@ -162,10 +161,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     ) {
         Log.e(TAG, requestCode.toString())
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
-            if (grantResults.isNotEmpty() && grantResults.get(0) == PackageManager.PERMISSION_GRANTED) {
-                val mapFragment =
-                    childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-                mapFragment.getMapAsync(this)
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                enableMyLocation()
             } else {
                 Toast.makeText(
                     context,
@@ -227,12 +224,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         map!!.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLatLng, zoomLevel))
         setPoiClick(map!!)
         setMapLongClick(map!!)
-
         setMapStyle(map!!)
-        if (map != null) {
-            map!!.isMyLocationEnabled = true;
-            map!!.uiSettings.isMyLocationButtonEnabled = true;
-        }
+        enableMyLocation()
+
     }
 
 }
