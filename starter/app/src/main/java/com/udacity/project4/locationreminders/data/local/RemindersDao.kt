@@ -16,7 +16,7 @@ interface RemindersDao {
      * @return all reminders.
      */
     @Query(/* value = */ "SELECT * FROM reminders")
-    suspend fun getReminders(): List<ReminderDTO>?
+    suspend fun getReminders(): List<ReminderDTO>
 
     /**
      * @param reminderId the id of the reminder

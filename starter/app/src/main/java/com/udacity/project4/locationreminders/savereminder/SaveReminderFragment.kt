@@ -92,7 +92,6 @@ class SaveReminderFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
         binding.selectLocation.setOnClickListener {
-            //            Navigate to another fragment to get the user location
             _viewModel.navigationCommand.value =
                 NavigationCommand.To(SaveReminderFragmentDirections.actionSaveReminderFragmentToSelectLocationFragment())
         }
@@ -121,10 +120,6 @@ class SaveReminderFragment : BaseFragment() {
                 checkPermissionsAndStartGeofencing()
             }
         }
-
-//        if (!foregroundAndBackgroundLocationPermissionApproved()) {
-//            requestForegroundAndBackgroundLocationPermissions()
-//        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -262,7 +257,8 @@ class SaveReminderFragment : BaseFragment() {
                         description,
                         location,
                         latitude,
-                        longitude
+                        longitude,
+                        id = id
                     )
                 )
             }
