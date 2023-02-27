@@ -30,7 +30,7 @@ class FakeDataSource : ReminderDataSource {
             return Result.Error("Test exception ")
         }
         remindersServiceData[id]?.let {
-            return Result.Success(listOf(it))
+            return Result.Success(it)
         }
         return Result.Error("Could not find reminder")
     }

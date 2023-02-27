@@ -143,4 +143,45 @@ class RemindersActivityTest :
     }
 
 
+    @Test
+    fun reminder_Location_Activity_show_toast_message() {
+
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+
+        Espresso.onView(withId(R.id.addReminderFAB)).perform(ViewActions.click())
+        Espresso.onView(withId(R.id.reminderTitle)).perform(ViewActions.replaceText("Test Title"))
+        Espresso.onView(withId(R.id.reminderDescription))
+            .perform(ViewActions.replaceText("Test Description"))
+
+        Thread.sleep(1000)
+
+        Espresso.onView(withId(R.id.selectLocation)).perform(ViewActions.click())
+        Espresso.onView(withId(R.id.map)).perform(ViewActions.longClick())
+
+        Thread.sleep(3000)
+
+        Espresso.onView(withId(R.id.save_btn)).perform(ViewActions.click())
+        Espresso.onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+
+        Espresso.onView(withText(R.string.reminder_saved)).inRoot(
+            RootMatchers.withDecorView(
+                CoreMatchers.not(
+                    Is.`is`(
+                        getActivity(activityScenario)!!.window.decorView
+                    )
+                )
+            )
+        ).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+        activityScenario.close()
+    }
+
+
+    private fun getActivity(activityScenario: ActivityScenario<RemindersActivity>): Activity? {
+        var activity: Activity? = null
+        activityScenario.onActivity {
+            activity = it
+        }
+        return activity
+    }
 }
