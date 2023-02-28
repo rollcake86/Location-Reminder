@@ -4,17 +4,18 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.udacity.project4.R
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
+import com.udacity.project4.locationreminders.getOrAwaitValue
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.hamcrest.MatcherAssert
-import org.hamcrest.core.Is
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import kotlinx.coroutines.test.pauseDispatcher
+import org.hamcrest.CoreMatchers
+import org.junit.*
 import org.junit.runner.RunWith
+import org.koin.core.context.stopKoin
 import org.robolectric.annotation.Config
 
 @Config(sdk = [31])
@@ -29,7 +30,8 @@ class SaveReminderViewModelTest {
 
     private lateinit var saveReminderViewModel: SaveReminderViewModel
     private lateinit var remindersLocalRepository: FakeDataSource
-
+    val list = listOf(ReminderDataItem("title", "description","location",(-360..360).random().toDouble(),(-360..360).random().toDouble()))
+    private val firstReminder = list[0]
     @Before
     fun setupViewModel() {
         // Initialise the repository with no reminders.
@@ -39,28 +41,26 @@ class SaveReminderViewModelTest {
     }
 
     @Test
-    fun whenIncompleteInfo_validationReturnsNull() {
-        // GIVEN - incomplete reminder fields, title is null
-        saveReminderViewModel.onClear()
-        saveReminderViewModel.reminderTitle.value = null
-        saveReminderViewModel.reminderDescription.value = "some description"
-        saveReminderViewModel.reminderSelectedLocationStr.value = null
-        saveReminderViewModel.longitude.value = 10.0
-        saveReminderViewModel.latitude.value = 10.0
+    fun check_loading() {
+        remindersLocalRepository = FakeDataSource()
+        saveReminderViewModel = SaveReminderViewModel(ApplicationProvider.getApplicationContext(), remindersLocalRepository)
+        mainCoroutineRule.pauseDispatcher()
+        saveReminderViewModel.validateAndSaveReminder(firstReminder)
+        Assert.assertThat(saveReminderViewModel.showLoading.getOrAwaitValue(), CoreMatchers.`is`(true))
+    }
 
-        // WHEN - atempting to validate
-        val result = saveReminderViewModel.validateEnteredData(
-            ReminderDataItem(
-                saveReminderViewModel.reminderTitle.value,
-                saveReminderViewModel.reminderDescription.value,
-                saveReminderViewModel.reminderSelectedLocationStr.value,
-                saveReminderViewModel.longitude.value,
-                saveReminderViewModel.latitude.value,
-                "someId"
-            )
-        )
-        // THEN - result is false
-        MatcherAssert.assertThat(result, Is.`is`(false))
+    @Test
+    fun returnError() {
+        remindersLocalRepository = FakeDataSource(null)
+        saveReminderViewModel = SaveReminderViewModel(ApplicationProvider.getApplicationContext(), remindersLocalRepository)
+        firstReminder.title = null
+        saveReminderViewModel.validateAndSaveReminder(firstReminder)
+        Assert.assertThat(saveReminderViewModel.showSnackBarInt.getOrAwaitValue(), CoreMatchers.`is`(
+            R.string.err_enter_title))
+    }
 
+    @After
+    fun tearDown() {
+        stopKoin()
     }
 }

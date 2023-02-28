@@ -3,16 +3,13 @@ package com.udacity.project4.locationreminders.reminderslist
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.common.truth.Truth.assertThat
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.pauseDispatcher
-import kotlinx.coroutines.test.resumeDispatcher
 import org.hamcrest.CoreMatchers
-import org.hamcrest.core.Is
-import org.hamcrest.core.Is.`is`
 import org.hamcrest.core.IsNot
 import org.junit.Assert
 import org.junit.Before
@@ -44,6 +41,32 @@ class RemindersListViewModelTest {
     // Use a fake repository to be injected into the view model.
     private lateinit var remindersRepository: FakeDataSource
 
+    val reminder1 = ReminderDTO(
+        "title1",
+        "description1",
+        "somewhere1",
+        11.0,
+        11.0,
+        "random1"
+    )
+    val reminder2 = ReminderDTO(
+        "title2",
+        "descriptio2n",
+        "somewhere2",
+        12.0,
+        12.0,
+        "random2"
+    )
+    val reminder3 = ReminderDTO(
+        "title3",
+        "description3",
+        "somewhere3",
+        13.0,
+        13.0,
+        "random3"
+    )
+
+
     @Before
     fun setupViewModel() {
         stopKoin()
@@ -56,34 +79,41 @@ class RemindersListViewModelTest {
     }
 
     @Test
-    fun loadReminders_loading() {
-        // GIVEN - we are loading reminders
-        mainCoroutineRule.pauseDispatcher()
+    fun getRemindersList() {
+        val remindersList = mutableListOf(reminder1, reminder2, reminder3)
+        remindersRepository = FakeDataSource(remindersList)
+        remindersListViewModel = RemindersListViewModel(ApplicationProvider.getApplicationContext(), remindersRepository)
         remindersListViewModel.loadReminders()
-
-        // WHEN - the dispatcher is paused, showLoading is true
-        Assert.assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), Is.`is`(true))
-        mainCoroutineRule.resumeDispatcher()
-
-        // THEN - when the dispatcher is resumed, showloading is false
-        Assert.assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), Is.`is`(false))
+        Assert.assertThat(
+            remindersListViewModel.remindersList.getOrAwaitValue(),
+            (IsNot.not(emptyList()))
+        )
+        Assert.assertThat(
+            remindersListViewModel.remindersList.getOrAwaitValue().size,
+            CoreMatchers.`is`(remindersList.size)
+        )
     }
 
     @Test
-    fun loadRemindersWhenUnavailable_causesError() {
-        // GIVEN - there's a problem loading reminders
-        // Make the repository return errors
-        remindersRepository.setReturnError(true)
-
-        // WHEN - we want to load rhe reminders
+    fun check_loading() {
+        remindersRepository = FakeDataSource(mutableListOf())
+        remindersListViewModel = RemindersListViewModel(ApplicationProvider.getApplicationContext(), remindersRepository)
+        mainCoroutineRule.pauseDispatcher()
         remindersListViewModel.loadReminders()
+        Assert.assertThat(
+            remindersListViewModel.showLoading.getOrAwaitValue(),
+            CoreMatchers.`is`(true)
+        )
+    }
 
-        // THEN - It's an error, there's a snackbar
+    @Test
+    fun returnError() {
+        remindersRepository = FakeDataSource(null)
+        remindersListViewModel = RemindersListViewModel(ApplicationProvider.getApplicationContext(), remindersRepository)
+        remindersListViewModel.loadReminders()
         Assert.assertThat(
             remindersListViewModel.showSnackBar.getOrAwaitValue(),
-            IsNot.not(CoreMatchers.nullValue())
+            CoreMatchers.`is`("No reminders found")
         )
-
-        Assert.assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), `is`(true))
     }
 }
