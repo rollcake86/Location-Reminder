@@ -11,6 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.pauseDispatcher
 import org.hamcrest.CoreMatchers
 import org.hamcrest.core.IsNot
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -70,12 +71,19 @@ class RemindersListViewModelTest {
     @Before
     fun setupViewModel() {
         stopKoin()
+
         // Initialise the repository with no reminders.
         remindersRepository = FakeDataSource()
 
         remindersListViewModel = RemindersListViewModel(
             ApplicationProvider.getApplicationContext(), remindersRepository
         )
+        remindersListViewModel.showLoading.value = true
+    }
+
+    @After
+    fun endViewModel(){
+        remindersListViewModel.showLoading.value = false
     }
 
     @Test
@@ -108,7 +116,7 @@ class RemindersListViewModelTest {
 
     @Test
     fun returnError() {
-        remindersRepository = FakeDataSource(null)
+        remindersRepository = FakeDataSource(mutableListOf())
         remindersListViewModel = RemindersListViewModel(ApplicationProvider.getApplicationContext(), remindersRepository)
         remindersListViewModel.loadReminders()
         Assert.assertThat(
