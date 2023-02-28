@@ -163,7 +163,7 @@ class RemindersActivityTest :
 
         Espresso.onView(withId(R.id.save_btn)).perform(ViewActions.click())
         Espresso.onView(withId(R.id.saveReminder)).perform(ViewActions.click())
-
+        Thread.sleep(1000)
         Espresso.onView(withText(R.string.reminder_saved)).inRoot(
             RootMatchers.withDecorView(
                 CoreMatchers.not(

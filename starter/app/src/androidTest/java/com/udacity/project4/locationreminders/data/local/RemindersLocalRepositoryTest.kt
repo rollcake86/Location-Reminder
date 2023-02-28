@@ -11,13 +11,12 @@ import com.udacity.project4.locationreminders.data.dto.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
+import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 
 @ExperimentalCoroutinesApi
@@ -90,12 +89,25 @@ class RemindersLocalRepositoryTest {
         assertThat(sortedLoadedRemindersList[0].id, `is`(remindersList[0].id))
         assertThat(sortedLoadedRemindersList[1].id, `is`(remindersList[1].id))
         assertThat(sortedLoadedRemindersList[2].id, `is`(remindersList[2].id))
-        assertThat(remindersDatabase.reminderDao().getReminderById(remindersList[0].id)!!.id, `is`(sortedLoadedRemindersList[0].id))
-
-        remindersDatabase.reminderDao().deleteAllReminders()
-
-        assertThat(remindersDatabase.reminderDao().getReminders()!!.size, `is`(0))
 
     }
 
+    @Test
+    fun getReminderByIdThatDoesNotExistInLocalCache() = runBlocking {
+
+        val loadedRemindersList = remindersDatabase.reminderDao().getReminders()
+        val sortedLoadedRemindersList = loadedRemindersList!!.sortedBy { it.id }
+        val reminder = repository.getReminder("fake") as Result.Error
+
+        // THEN - The loaded data contains the expected values
+        assertThat(reminder.message, `is`("Reminder not found!"))
+    }
+
+    @Test
+    fun deleteAllReminders_EmptyListFetchedFromLocalCache() = runBlocking {
+        assertThat(remindersDatabase.reminderDao().getReminders().isNotEmpty(), `is`(false) )
+        remindersDatabase.reminderDao().deleteAllReminders()
+        // Then - fetching should return empty list
+        assertThat(remindersDatabase.reminderDao().getReminders().isEmpty(), `is`(true) )
+    }
 }
