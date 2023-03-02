@@ -10,8 +10,8 @@ import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -49,11 +49,12 @@ class RemindersActivityTest :
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
     private val dataBindingIdlingResource = DataBindingIdlingResource()
-
+    private lateinit var remindersActivity : RemindersActivity
     /**
      * As we use Koin as a Service Locator Library to develop our code, we'll also use Koin to test our code.
      * at this step we will initialize Koin related code to be able to use it in out testing.
      */
+
 
     @Before
     fun registerIdlingResource() {
@@ -86,7 +87,10 @@ class RemindersActivityTest :
         }
         //Get our real repository
         repository = get()
-
+        ActivityScenario.launch(RemindersActivity::class.java).onActivity {
+            remindersActivity = it
+            return@onActivity
+        }
         //clear the data to start fresh
         runBlocking {
             repository.deleteAllReminders()
@@ -96,7 +100,6 @@ class RemindersActivityTest :
     @After
     fun unregisterIdlingResource() = runBlocking {
         IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
-
         repository.deleteAllReminders()
     }
 
@@ -163,25 +166,17 @@ class RemindersActivityTest :
 
         Espresso.onView(withId(R.id.save_btn)).perform(ViewActions.click())
         Espresso.onView(withId(R.id.saveReminder)).perform(ViewActions.click())
-        Thread.sleep(1000)
         Espresso.onView(withText(R.string.reminder_saved)).inRoot(
             RootMatchers.withDecorView(
                 CoreMatchers.not(
                     Is.`is`(
-                        getActivity(activityScenario)!!.window.decorView
+                        remindersActivity.window.decorView
                     )
                 )
             )
-        ).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+        ).check(ViewAssertions.matches(isDisplayed()))
+
         activityScenario.close()
     }
 
-
-    private fun getActivity(activityScenario: ActivityScenario<RemindersActivity>): Activity? {
-        var activity: Activity? = null
-        activityScenario.onActivity {
-            activity = it
-        }
-        return activity
-    }
 }

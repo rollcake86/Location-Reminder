@@ -25,10 +25,10 @@ class FakeDataSource(var remindersServiceData: MutableList<ReminderDTO> = mutabl
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
         if (shouldReturnError) {
-            return Result.Error("Test exception ")
+            return Result.Error("Test exception")
         }
         remindersServiceData.firstOrNull { it.id == id }?.let { return Result.Success(it) }
-        return Result.Error("Could not find reminder")
+        return Result.Error("Reminder not found")
     }
 
     override suspend fun deleteAllReminders() {

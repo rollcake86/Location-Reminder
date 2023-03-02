@@ -71,8 +71,6 @@ class RemindersListViewModelTest {
     @Before
     fun setupViewModel() {
         stopKoin()
-
-        // Initialise the repository with no reminders.
         remindersRepository = FakeDataSource()
 
         remindersListViewModel = RemindersListViewModel(
@@ -117,11 +115,12 @@ class RemindersListViewModelTest {
     @Test
     fun returnError() {
         remindersRepository = FakeDataSource(mutableListOf())
+        remindersRepository.setReturnError(true)
         remindersListViewModel = RemindersListViewModel(ApplicationProvider.getApplicationContext(), remindersRepository)
         remindersListViewModel.loadReminders()
         Assert.assertThat(
             remindersListViewModel.showSnackBar.getOrAwaitValue(),
-            CoreMatchers.`is`("No reminders found")
+            CoreMatchers.`is`("Test exception")
         )
     }
 }

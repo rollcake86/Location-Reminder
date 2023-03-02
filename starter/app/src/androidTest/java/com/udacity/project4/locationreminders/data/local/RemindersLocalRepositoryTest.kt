@@ -6,6 +6,7 @@ import androidx.test.InstrumentationRegistry
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import com.udacity.project4.FakeReminderDao
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import kotlinx.coroutines.Dispatchers
@@ -25,27 +26,19 @@ import org.junit.runner.RunWith
 @MediumTest
 class RemindersLocalRepositoryTest {
 
-    private lateinit var remindersDatabase: RemindersDatabase
-    private lateinit var remindersDAO: RemindersDao
+    private lateinit var remindersDAO: FakeReminderDao
     private lateinit var repository: RemindersLocalRepository
 
     @Before
     fun setup() {
-        remindersDatabase = Room.inMemoryDatabaseBuilder(
-            InstrumentationRegistry.getInstrumentation().context,
-            RemindersDatabase::class.java
-        )
-            .allowMainThreadQueries()
-            .build()
-        remindersDAO = remindersDatabase.reminderDao()
+        remindersDAO = FakeReminderDao()
         repository =
             RemindersLocalRepository(
                 remindersDAO
             )
     }
 
-    @After
-    fun closeDb() = remindersDatabase.close()
+
 
     @Test
     fun insertThreeReminders_getAllThreeFromDatabase() = runBlocking {
@@ -74,15 +67,18 @@ class RemindersLocalRepositoryTest {
             13.0,
             "random3"
         )
-        remindersDatabase.reminderDao().saveReminder(reminder1)
-        remindersDatabase.reminderDao().saveReminder(reminder2)
-        remindersDatabase.reminderDao().saveReminder(reminder3)
+        remindersDAO.saveReminder(reminder1)
+        remindersDAO.saveReminder(reminder2)
+        remindersDAO.saveReminder(reminder3)
         val remindersList = listOf(reminder1, reminder2, reminder3).sortedBy { it.id }
 
+
         // WHEN - Get all the reminders from the database
-        val loadedRemindersList = remindersDatabase.reminderDao().getReminders()
+        val loadedRemindersList = remindersDAO.getReminders()
         val sortedLoadedRemindersList = loadedRemindersList!!.sortedBy { it.id }
+
         val reminder = repository.getReminder("fake") as Result.Error
+
 
         // THEN - The loaded data contains the expected values
         assertThat(reminder.message, `is`("Reminder not found!"))
@@ -95,7 +91,7 @@ class RemindersLocalRepositoryTest {
     @Test
     fun getReminderByIdThatDoesNotExistInLocalCache() = runBlocking {
 
-        val loadedRemindersList = remindersDatabase.reminderDao().getReminders()
+        val loadedRemindersList = remindersDAO.getReminders()
         val sortedLoadedRemindersList = loadedRemindersList!!.sortedBy { it.id }
         val reminder = repository.getReminder("fake") as Result.Error
 
@@ -105,9 +101,9 @@ class RemindersLocalRepositoryTest {
 
     @Test
     fun deleteAllReminders_EmptyListFetchedFromLocalCache() = runBlocking {
-        assertThat(remindersDatabase.reminderDao().getReminders().isNotEmpty(), `is`(false) )
-        remindersDatabase.reminderDao().deleteAllReminders()
+        assertThat(remindersDAO.getReminders().isNotEmpty(), `is`(false) )
+        remindersDAO.deleteAllReminders()
         // Then - fetching should return empty list
-        assertThat(remindersDatabase.reminderDao().getReminders().isEmpty(), `is`(true) )
+        assertThat(remindersDAO.getReminders().isEmpty(), `is`(true) )
     }
 }

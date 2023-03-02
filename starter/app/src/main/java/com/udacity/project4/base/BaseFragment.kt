@@ -1,5 +1,9 @@
 package com.udacity.project4.base
 
+import android.graphics.Color
+import android.graphics.Typeface
+import android.view.Gravity
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -21,7 +25,20 @@ abstract class BaseFragment : Fragment() {
             Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
         })
         _viewModel.showToast.observe(this, Observer {
-            Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
+//            Toast.makeText(requireContext().applicationContext, it, Toast.LENGTH_LONG).show()
+            val toast: Toast = Toast.makeText(context, it, Toast.LENGTH_LONG)
+            val textView = TextView(context)
+            textView.setBackgroundColor(Color.DKGRAY)
+            textView.setTextColor(Color.WHITE)
+            textView.textSize = 15f
+            val typeface: Typeface = Typeface.create("serif", Typeface.BOLD)
+            textView.typeface = typeface
+            textView.setPadding(10, 10, 10, 10)
+            textView.text = it
+
+            toast.view = textView
+            toast.show()
+
         })
         _viewModel.showSnackBar.observe(this, Observer {
             Snackbar.make(this.requireView(), it, Snackbar.LENGTH_LONG).show()
