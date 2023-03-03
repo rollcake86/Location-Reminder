@@ -12,6 +12,7 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.pauseDispatcher
+import kotlinx.coroutines.test.resumeDispatcher
 import org.hamcrest.CoreMatchers
 import org.junit.*
 import org.junit.runner.RunWith
@@ -47,6 +48,8 @@ class SaveReminderViewModelTest {
         mainCoroutineRule.pauseDispatcher()
         saveReminderViewModel.validateAndSaveReminder(firstReminder)
         Assert.assertThat(saveReminderViewModel.showLoading.getOrAwaitValue(), CoreMatchers.`is`(true))
+        mainCoroutineRule.resumeDispatcher()
+        Assert.assertThat(saveReminderViewModel.showLoading.getOrAwaitValue(), CoreMatchers.`is`(false))
     }
 
     @Test

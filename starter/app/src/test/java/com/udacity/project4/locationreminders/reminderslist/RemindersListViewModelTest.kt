@@ -9,6 +9,7 @@ import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.pauseDispatcher
+import kotlinx.coroutines.test.resumeDispatcher
 import org.hamcrest.CoreMatchers
 import org.hamcrest.core.IsNot
 import org.junit.After
@@ -109,6 +110,11 @@ class RemindersListViewModelTest {
         Assert.assertThat(
             remindersListViewModel.showLoading.getOrAwaitValue(),
             CoreMatchers.`is`(true)
+        )
+        mainCoroutineRule.resumeDispatcher()
+        Assert.assertThat(
+            remindersListViewModel.showLoading.getOrAwaitValue(),
+            CoreMatchers.`is`(false)
         )
     }
 

@@ -29,6 +29,31 @@ class RemindersLocalRepositoryTest {
     private lateinit var remindersDAO: FakeReminderDao
     private lateinit var repository: RemindersLocalRepository
 
+    val reminder1 = ReminderDTO(
+        "title1",
+        "description1",
+        "somewhere1",
+        11.0,
+        11.0,
+        "random1"
+    )
+    val reminder2 = ReminderDTO(
+        "title2",
+        "descriptio2n",
+        "somewhere2",
+        12.0,
+        12.0,
+        "random2"
+    )
+    val reminder3 = ReminderDTO(
+        "title3",
+        "description3",
+        "somewhere3",
+        13.0,
+        13.0,
+        "random3"
+    )
+
     @Before
     fun setup() {
         remindersDAO = FakeReminderDao()
@@ -43,67 +68,45 @@ class RemindersLocalRepositoryTest {
     @Test
     fun insertThreeReminders_getAllThreeFromDatabase() = runBlocking {
         // GIVEN - insert three reminders in the database
-        val reminder1 = ReminderDTO(
-            "title1",
-            "description1",
-            "somewhere1",
-            11.0,
-            11.0,
-            "random1"
-        )
-        val reminder2 = ReminderDTO(
-            "title2",
-            "descriptio2n",
-            "somewhere2",
-            12.0,
-            12.0,
-            "random2"
-        )
-        val reminder3 = ReminderDTO(
-            "title3",
-            "description3",
-            "somewhere3",
-            13.0,
-            13.0,
-            "random3"
-        )
-        remindersDAO.saveReminder(reminder1)
-        remindersDAO.saveReminder(reminder2)
-        remindersDAO.saveReminder(reminder3)
-        val remindersList = listOf(reminder1, reminder2, reminder3).sortedBy { it.id }
+        repository.saveReminder(reminder1)
+        repository.saveReminder(reminder2)
+        repository.saveReminder(reminder3)
+        val loadedRemindersList = (repository.getReminders() as Result.Success)?.data
+        assertThat(loadedRemindersList?.size, `is`(3))
+        assertThat(loadedRemindersList?.isNotEmpty(), `is`(true))
+    }
 
+    @Test
+    fun getReminderByIdThatExistsInLocalCache() = runBlocking {
+        repository.saveReminder(reminder1)
 
-        // WHEN - Get all the reminders from the database
-        val loadedRemindersList = remindersDAO.getReminders()
-        val sortedLoadedRemindersList = loadedRemindersList!!.sortedBy { it.id }
+        val loadedReminder = (repository.getReminder(reminder1.id) as Result.Success).data
 
-        val reminder = repository.getReminder("fake") as Result.Error
-
-
-        // THEN - The loaded data contains the expected values
-        assertThat(reminder.message, `is`("Reminder not found!"))
-        assertThat(sortedLoadedRemindersList[0].id, `is`(remindersList[0].id))
-        assertThat(sortedLoadedRemindersList[1].id, `is`(remindersList[1].id))
-        assertThat(sortedLoadedRemindersList[2].id, `is`(remindersList[2].id))
-
+        assertThat(loadedReminder.id, `is`(reminder1.id))
+        assertThat(loadedReminder.title, `is`(reminder1.title))
+        assertThat(loadedReminder.description, `is`(reminder1.description))
+        assertThat(loadedReminder.location, `is`(reminder1.location))
+        assertThat(loadedReminder.latitude, `is`(reminder1.latitude))
+        assertThat(loadedReminder.longitude,`is`(reminder1.longitude))
     }
 
     @Test
     fun getReminderByIdThatDoesNotExistInLocalCache() = runBlocking {
-
-        val loadedRemindersList = remindersDAO.getReminders()
-        val sortedLoadedRemindersList = loadedRemindersList!!.sortedBy { it.id }
         val reminder = repository.getReminder("fake") as Result.Error
-
         // THEN - The loaded data contains the expected values
         assertThat(reminder.message, `is`("Reminder not found!"))
     }
 
     @Test
     fun deleteAllReminders_EmptyListFetchedFromLocalCache() = runBlocking {
-        assertThat(remindersDAO.getReminders().isNotEmpty(), `is`(false) )
-        remindersDAO.deleteAllReminders()
+        repository.saveReminder(reminder1)
+        repository.saveReminder(reminder2)
+        repository.saveReminder(reminder3)
+        val reminder = (repository.getReminders() as Result.Success)?.data
+        assertThat(reminder?.isNotEmpty(), `is`(true) )
+        repository.deleteAllReminders()
         // Then - fetching should return empty list
-        assertThat(remindersDAO.getReminders().isEmpty(), `is`(true) )
+        val reminder2 = (repository.getReminders() as Result.Success)?.data
+        assertThat(reminder2?.isEmpty(), `is`(true) )
     }
 }
